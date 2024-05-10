@@ -29,5 +29,15 @@ namespace WS_Appointment.Feature.dao
         public Task UpdateConfig(configurationModel request);
         public Task<bool> DeleteConfigById(long id);
         #endregion
+
+        #region appointments
+        public Task<List<appointmentsModel>> GetAllAppointments();
+        public Task CreateAppointments(appointmentsModel request);
+        public Task<appointmentsModel> GetAppointmentById(long id);
+        public Task UpdateAppointment(appointmentsModel request);
+        public Task<bool> DeleteAppointmentsById(long id);
+        public Task<AppointmentCountMax> GetTotalAppointments(DateTime appointment_date);
+        public Task<List<AppointmentHolidayDate>> GetListHolidayForBook(DateTime appointment_date);
+        #endregion
     }
 }

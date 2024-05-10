@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json.Linq;
 using WS_Appointment.EFCore;
 using WS_Appointment.Feature.dto;
 using WS_Appointment.Feature.Model;
@@ -332,6 +333,165 @@ namespace WS_Appointment.Feature.dao
                 string message = ex.Message;
                 result = false;
             }
+            return result;
+        }
+
+        public async Task<List<appointmentsModel>> GetAllAppointments()
+        {
+            List<appointmentsModel> result = new List<appointmentsModel>();
+            var data = _context.Appointments.ToList();
+            var dataList = data.Select(c => new appointmentsModel
+            {
+                id = c.id,
+                customer_id = c.customer_id,
+                appointment_date = c.appointment_date,
+                status = c.status,
+                serviceType = c.serviceType,
+                token = c.token,
+                appointmentNo = c.appointmentNo,
+                created_by = c.created_by,
+                created_on = c.created_on != null ? c.created_on.Value : null,
+                updated_by = c.updated_by,
+                updated_on = c.updated_on != null ? c.updated_on.Value : null,
+            }).ToList();
+            result = dataList;
+
+            return result;
+        }
+
+        public async Task CreateAppointments(appointmentsModel request)
+        {
+            appointments dataSubmit = new appointments();
+            try
+            {
+                dataSubmit.customer_id = request.customer_id;
+                dataSubmit.appointment_date = request.appointment_date;
+                dataSubmit.status = request.status;
+                dataSubmit.serviceType = request.serviceType;
+                dataSubmit.token = request.token;
+                dataSubmit.appointmentNo = request.appointmentNo;
+                dataSubmit.created_by = "sys";
+                dataSubmit.created_on = DateTime.Now.Date;
+                dataSubmit.updated_on = null;
+                dataSubmit.updated_by = string.Empty;
+                dataSubmit.id = 0;
+                var save = _context.Appointments.Add(dataSubmit);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+        }
+
+        public async Task<appointmentsModel> GetAppointmentById(long id)
+        {
+            appointmentsModel result = new appointmentsModel();
+            try
+            {
+                var data = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync();
+                result.id = data.id;
+                result.customer_id = data.customer_id;
+                result.appointment_date = data.appointment_date;
+                result.status = data.status;
+                result.serviceType = data.serviceType;
+                result.token = data.token;
+                result.appointmentNo = data.appointmentNo;
+                result.created_by = data.created_by;
+                result.created_on = data.created_on;
+                result.updated_on = data.updated_on;
+                result.updated_by = data.updated_by;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return result;
+        }
+
+        public async Task UpdateAppointment(appointmentsModel request)
+        {
+            appointments dataSubmit = new appointments();
+            try
+            {
+                dataSubmit.customer_id = request.customer_id;
+                dataSubmit.appointment_date = request.appointment_date;
+                dataSubmit.status = request.status;
+                dataSubmit.serviceType = request.serviceType;
+                dataSubmit.token = request.token;
+                dataSubmit.appointmentNo = request.appointmentNo;
+                dataSubmit.created_by = request.created_by;
+                dataSubmit.created_on = request.created_on;
+                dataSubmit.updated_on = request.updated_on;
+                dataSubmit.updated_by = request.updated_by;
+                dataSubmit.id = request.id;
+                var save = _context.Appointments.Update(dataSubmit);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+        }
+
+        public async Task<bool> DeleteAppointmentsById(long id)
+        {
+            bool result = false;
+            try
+            {
+                var existing = _context.Appointments.Where(d => d.id.Equals(id)).FirstOrDefault();
+                if (existing != null)
+                {
+                    _context.Appointments.Remove(existing);
+                    _context.SaveChanges();
+                    result = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+                result = false;
+            }
+            return result;
+        }
+
+        public async Task<AppointmentCountMax> GetTotalAppointments(DateTime appointment_date)
+        {
+            AppointmentCountMax result = new AppointmentCountMax();
+            var appToday = _context.Appointments.Where(x => x.appointment_date == appointment_date).ToList();
+            var maxConfig = _context.Configurations.FirstOrDefault();
+            var dataMap = new AppointmentCountMax
+            {
+                totalAppToday = appToday.Count,
+                totalMax = int.Parse(maxConfig.config_value)
+            };
+            result = dataMap;
+
+            return result;
+        }
+
+        public async Task<List<AppointmentHolidayDate>> GetListHolidayForBook(DateTime appointment_date)
+        {
+            List<AppointmentHolidayDate> result = new List<AppointmentHolidayDate>();
+            try
+            {
+                var nextHoliday = _context.Public_Holidays.Where(x => x.holiday_date >= appointment_date).OrderBy(x => x.holiday_date).ToList();
+                foreach (var holiday in nextHoliday)
+                {
+                    var dataHoliday = new AppointmentHolidayDate
+                    {
+                        holiday_date = holiday.holiday_date
+                    };
+                    result.Add(dataHoliday);
+                }
+            }
+            catch(Exception ex)
+            {
+                string message = ex.Message;
+                result = null;
+            }
+           
+
             return result;
         }
     }

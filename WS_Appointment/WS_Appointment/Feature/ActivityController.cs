@@ -18,6 +18,280 @@ namespace WS_Appointment.Feature
             _actDao = actDao;
         }
 
+        #region appointments
+
+        [HttpGet]
+        [Route("GetAppointmentList")]
+        public async Task<IActionResult> GetAppointmentList()
+        {
+
+            var result = new APIResultList<List<appointmentsModel>>();
+
+            try
+            {
+                var data = await _actDao.GetAllAppointments();
+                result.is_ok = true;
+                result.message = "Success";
+                result.data = data.ToList();
+                result.totalRow = data.Count;
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data Not Found";
+            }
+
+            return Ok(result);
+
+        }
+
+        [HttpPost]
+        [Route("CreateAppointment")]
+        public async Task<IActionResult> CreateAppointment([FromBody] AppointmentRequest request)
+        {
+
+            var result = new APIResult<appointments>();
+            try
+            {
+                if (request.customer_id == 0)
+                {
+                    result.is_ok = false;
+                    result.message = "customer must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                if (request.appointment_date == null)
+                {
+                    result.is_ok = false;
+                    result.message = "appointment date must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                if (string.IsNullOrEmpty(request.status))
+                {
+                    result.is_ok = false;
+                    result.message = "status must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                if (string.IsNullOrEmpty(request.serviceType))
+                {
+                    result.is_ok = false;
+                    result.message = "service description must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+                //to create new appointment no to other days if today maximal
+                int appno = 0;
+                DateTime appdate_fix = request.appointment_date;
+
+                //get all holidays date next from appointment date
+                var nextHolidays = await _actDao.GetListHolidayForBook(request.appointment_date);
+                foreach (var holiday in nextHolidays)
+                {
+                    if (appdate_fix == holiday.holiday_date)
+                    {
+                        appdate_fix.AddDays(1);
+                    }
+                }
+
+                //get max queue for datechoosen
+                var dataCountApp = await _actDao.GetTotalAppointments(appdate_fix);
+                //generate app no
+                if (dataCountApp.totalAppToday < dataCountApp.totalMax)
+                {
+                    appno = dataCountApp.totalAppToday + 1;
+                }
+                else
+                {
+                    appno += 1;
+                }
+
+                appointmentsModel objApp = new appointmentsModel();
+                objApp.appointmentNo = appno.ToString();
+                objApp.appointment_date = appdate_fix;
+                objApp.customer_id = request.customer_id;
+                objApp.status = request.status;
+                objApp.serviceType = request.serviceType;
+                objApp.token = CreateRandomToken();
+                objApp.created_by = "sys";
+                objApp.created_on = DateTime.Now.Date;
+                objApp.updated_by = String.Empty;
+                objApp.updated_on = null;
+
+
+                await _actDao.CreateAppointments(objApp);
+                result.is_ok = true;
+                result.message = "Success";
+
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to submit, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("UpdateAppointment")]
+        public async Task<IActionResult> UpdateAppointment([FromBody] AppointmentUpdateRequest request)
+        {
+
+            var result = new APIResult<customersModel>();
+
+            try
+            {
+                if (request != null && request.id > 0)
+                {
+                    //get detail customer existing
+                    var dataExist = await _actDao.GetAppointmentById(request.id);
+                    if (dataExist == null)
+                    {
+                        result.is_ok = false;
+                        result.message = "Appointment with id:" + request.id + " cannot find in database.";
+                        return Ok(result);
+                    }
+
+                    if (request.customer_id == 0)
+                    {
+                        result.is_ok = false;
+                        result.message = "customer must be filled";
+                        result.data = null;
+                        return Ok(result);
+                    }
+
+                    if (request.appointment_date == null)
+                    {
+                        result.is_ok = false;
+                        result.message = "appointment date must be filled";
+                        result.data = null;
+                        return Ok(result);
+                    }
+
+                    if (string.IsNullOrEmpty(request.status))
+                    {
+                        result.is_ok = false;
+                        result.message = "status must be filled";
+                        result.data = null;
+                        return Ok(result);
+                    }
+
+                    if (string.IsNullOrEmpty(request.serviceType))
+                    {
+                        result.is_ok = false;
+                        result.message = "service description must be filled";
+                        result.data = null;
+                        return Ok(result);
+                    }
+                    //to create new appointment no to other days if today maximal
+                    int appno = (request.appointment_date != dataExist.appointment_date) ? 0: int.Parse(dataExist.appointmentNo);
+                    DateTime appdate_fix = (request.appointment_date!= dataExist.appointment_date) ?  request.appointment_date : dataExist.appointment_date;
+                    if (request.appointment_date != dataExist.appointment_date)
+                    {
+                        //get all holidays date next from appointment date
+                        var nextHolidays = await _actDao.GetListHolidayForBook(request.appointment_date);
+                        foreach (var holiday in nextHolidays)
+                        {
+                            if (appdate_fix == holiday.holiday_date)
+                            {
+                                appdate_fix.AddDays(1);
+                            }
+                        }
+
+                        //get max queue for datechoosen
+                        var dataCountApp = await _actDao.GetTotalAppointments(appdate_fix);
+                        //generate app no
+                        if (dataCountApp.totalAppToday < dataCountApp.totalMax)
+                        {
+                            appno = dataCountApp.totalAppToday + 1;
+                        }
+                        else
+                        {
+                            appno += 1;
+                        }
+                    }
+
+                    appointmentsModel objApp = new appointmentsModel();
+                    objApp.appointmentNo = appno.ToString();
+                    objApp.appointment_date = appdate_fix;
+                    objApp.customer_id = request.customer_id;
+                    objApp.status = request.status;
+                    objApp.serviceType = request.serviceType;
+                    objApp.token = dataExist.token;
+                    objApp.created_by = dataExist.created_by;
+                    objApp.created_on = dataExist.created_on;
+                    objApp.updated_by = "sys";
+                    objApp.updated_on = DateTime.Now.Date;
+                    objApp.id = dataExist.id;
+
+                    await _actDao.UpdateAppointment(objApp);
+                    result.is_ok = true;
+                    result.message = "Success";
+
+                }
+                else
+                {
+                    result.is_ok = false;
+                    result.message = "payload must be filled.";
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to update, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        [HttpDelete]
+        [Route("DeleteAppointmentById")]
+        public async Task<IActionResult> DeleteAppointmentById(long id)
+        {
+            var result = new APIResult<appointmentsModel>();
+            try
+            {
+                if (id == 0)
+                {
+                    result.is_ok = false;
+                    result.message = "id must be filled and greater than 0";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                await _actDao.DeleteAppointmentsById(id);
+                result.is_ok = true;
+                result.message = "Success";
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to delete, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        private string CreateRandomToken(int length = 8)
+        {
+            // Create a string of characters, numbers, special characters that allowed in the password  
+            string validChars = "ABCDEFGHJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*?_-";
+            Random random = new Random();
+
+            // Select one random character at a time from the string  
+            // and create an array of chars  
+            char[] chars = new char[length];
+            for (int i = 0; i < length; i++)
+            {
+                chars[i] = validChars[random.Next(0, validChars.Length)];
+            }
+            return new string(chars);
+        }
+        #endregion
+
         #region customer
 
         [HttpGet]
@@ -49,7 +323,7 @@ namespace WS_Appointment.Feature
         [Route("Customer/CreateCustomer")]
         public async Task<IActionResult> CreateCustomer([FromBody] CustomerRequest request)
         {
-            
+
             var result = new APIResult<customers>();
             try
             {
@@ -121,9 +395,9 @@ namespace WS_Appointment.Feature
         [Route("Customer/UpdateCustomer")]
         public async Task<IActionResult> UpdateCustomer([FromBody] CustomerUpdateRequest request)
         {
-            
+
             var result = new APIResult<customersModel>();
-            
+
             try
             {
                 if (request != null && request.id > 0)
@@ -133,7 +407,7 @@ namespace WS_Appointment.Feature
                     if (dataExist == null)
                     {
                         result.is_ok = false;
-                        result.message = "Customer with id:"+request.id+" cannot find in database.";
+                        result.message = "Customer with id:" + request.id + " cannot find in database.";
                         return Ok(result);
                     }
 
@@ -154,7 +428,7 @@ namespace WS_Appointment.Feature
                     var update = _actDao.UpdateCustomer(dataUpdate);
                     result.is_ok = true;
                     result.message = "Success";
-                    
+
                 }
                 else
                 {
@@ -197,6 +471,7 @@ namespace WS_Appointment.Feature
             }
             return Ok(result);
         }
+
 
         #endregion
 
