@@ -248,6 +248,33 @@ namespace WS_Appointment.Feature
             return Ok(result);
         }
 
+        [HttpGet]
+        [Route("GetDetailAppointmentById")]
+        public async Task<IActionResult> GetDetailAppointmentById(long id)
+        {
+            var result = new APIResult<appointmentsModel>();
+            try
+            {
+                if (id == 0)
+                {
+                    result.is_ok = false;
+                    result.message = "id must be filled and must be greater than 0";
+                    result.data = null;
+                    return Ok(result);
+                }
+                var data = await _actDao.GetAppointmentById(id);
+                result.data = data;
+                result.is_ok = true;
+                result.message = "Success";
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data not found, please contact administrator";
+            }
+            return Ok(result);
+        }
+
         [HttpDelete]
         [Route("DeleteAppointmentById")]
         public async Task<IActionResult> DeleteAppointmentById(long id)
