@@ -3,3 +3,5 @@
 ################################################################################
 
 /WS_Appointment/.vs
+/WS_Appointment/WS_AppointmentTest/bin/Debug/net6.0
+/WS_Appointment/WS_AppointmentTest/obj/Debug/net6.0
