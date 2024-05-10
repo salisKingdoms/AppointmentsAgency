@@ -18,6 +18,8 @@ namespace WS_Appointment.Feature
             _actDao = actDao;
         }
 
+        #region customer
+
         [HttpGet]
         [Route("Customer/GetCustomerList")]
         public async Task<IActionResult> GetCustomerList()
@@ -195,6 +197,8 @@ namespace WS_Appointment.Feature
             }
             return Ok(result);
         }
+
+        #endregion
 
         #region public holiday
 
