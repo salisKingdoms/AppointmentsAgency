@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using WS_Appointment.EFCore;
@@ -11,9 +12,10 @@ using WS_Appointment.EFCore;
 namespace WS_Appointment.Migrations
 {
     [DbContext(typeof(EF_DataContext))]
-    partial class EF_DataContextModelSnapshot : ModelSnapshot
+    [Migration("20240510161237_AlterColumnonConfiguration")]
+    partial class AlterColumnonConfiguration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

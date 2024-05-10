@@ -232,5 +232,107 @@ namespace WS_Appointment.Feature.dao
             }
             return result;
         }
+
+        public async Task<List<configurationModel>> GetAllConfig()
+        {
+            List<configurationModel> result = new List<configurationModel>();
+            var data = _context.Configurations.ToList();
+            var dataList = data.Select(c => new configurationModel
+            {
+                id = c.id,
+                config_value = c.config_value,
+                created_by = c.created_by,
+                created_on = c.created_on != null ? c.created_on.Value : null,
+                updated_by = c.updated_by,
+                updated_on = c.updated_on != null ? c.updated_on.Value : null,
+            }).ToList();
+            result = dataList;
+
+            return result;
+        }
+
+        public async Task CreateConfig(ConfigRequest request)
+        {
+            configuration dataSubmit = new configuration();
+            try
+            {
+                dataSubmit.config_value = request.config_value;
+                dataSubmit.description = request.description;
+                dataSubmit.created_by = "sys";
+                dataSubmit.created_on = DateTime.Now.Date;
+                dataSubmit.updated_on = null;
+                dataSubmit.updated_by = string.Empty;
+                dataSubmit.id = 0;
+                var save = _context.Configurations.Add(dataSubmit);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+        }
+
+        public async Task<configurationModel> GetConfigById(long id)
+        {
+            configurationModel result = new configurationModel();
+            try
+            {
+                var data = await _context.Configurations.AsNoTracking().FirstOrDefaultAsync();
+                result.id = data.id;
+                result.config_value = data.config_value;
+                result.description = data.description;
+                result.created_by = data.created_by;
+                result.created_on = data.created_on;
+                result.updated_on = data.updated_on;
+                result.updated_by = data.updated_by;
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+            return result;
+        }
+
+        public async Task UpdateConfig(configurationModel request)
+        {
+            configuration dataSubmit = new configuration();
+            try
+            {
+                dataSubmit.config_value = request.config_value;
+                dataSubmit.description = request.description;
+                dataSubmit.created_by = request.created_by;
+                dataSubmit.created_on = request.created_on;
+                dataSubmit.updated_on = request.updated_on;
+                dataSubmit.updated_by = request.updated_by;
+                dataSubmit.id = request.id;
+                var save = _context.Configurations.Update(dataSubmit);
+                _context.SaveChanges();
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+            }
+        }
+
+        public async Task<bool> DeleteConfigById(long id)
+        {
+            bool result = false;
+            try
+            {
+                var existing = _context.Configurations.Where(d => d.id.Equals(id)).FirstOrDefault();
+                if (existing != null)
+                {
+                    _context.Configurations.Remove(existing);
+                    _context.SaveChanges();
+                    result = true;
+                }
+            }
+            catch (Exception ex)
+            {
+                string message = ex.Message;
+                result = false;
+            }
+            return result;
+        }
     }
 }

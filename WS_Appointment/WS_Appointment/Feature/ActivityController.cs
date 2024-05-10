@@ -366,5 +366,174 @@ namespace WS_Appointment.Feature
         }
 
         #endregion
+
+        #region config
+        [HttpGet]
+        [Route("Configuration/GetConfigList")]
+        public async Task<IActionResult> GetConfigList()
+        {
+
+            var result = new APIResultList<List<configurationModel>>();
+
+            try
+            {
+                var data = await _actDao.GetAllConfig();
+                result.is_ok = true;
+                result.message = "Success";
+                result.data = data.ToList();
+                result.totalRow = data.Count;
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data Not Found";
+            }
+
+            return Ok(result);
+
+        }
+
+        [HttpPost]
+        [Route("Configuration/CreateConfig")]
+        public async Task<IActionResult> CreateConfig([FromBody] ConfigRequest request)
+        {
+
+            var result = new APIResult<configuration>();
+            try
+            {
+                if (string.IsNullOrEmpty(request.config_value))
+                {
+                    result.is_ok = false;
+                    result.message = "config_value must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                if (string.IsNullOrEmpty(request.description))
+                {
+                    result.is_ok = false;
+                    result.message = "description must be filled";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                await _actDao.CreateConfig(request);
+                result.is_ok = true;
+                result.message = "Success";
+
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to submit, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        [HttpGet]
+        [Route("Configuration/GetConfigById")]
+        public async Task<IActionResult> GetConfigById(long id)
+        {
+            var result = new APIResult<configurationModel>();
+            try
+            {
+                if (id == 0)
+                {
+                    result.is_ok = false;
+                    result.message = "id must be filled and must be greater than 0";
+                    result.data = null;
+                    return Ok(result);
+                }
+                var data = await _actDao.GetConfigById(id);
+                result.data = data;
+                result.is_ok = true;
+                result.message = "Success";
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data not found, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        [HttpPost]
+        [Route("Configuration/UpdateConfig")]
+        public async Task<IActionResult> UpdateConfig([FromBody] ConfigUpdateRequest request)
+        {
+
+            var result = new APIResult<configurationModel>();
+
+            try
+            {
+                if (request != null && request.id > 0)
+                {
+                    var dataExist = await _actDao.GetConfigById(request.id);
+                    if (dataExist == null)
+                    {
+                        result.is_ok = false;
+                        result.message = "Config with value:" + request.config_value + " cannot find in database.";
+                        return Ok(result);
+                    }
+
+                    //mapping data existing with request for update
+                    var dataUpdate = new configurationModel
+                    {
+                        id = request.id,
+                        config_value = request.config_value,
+                        description = request.description,
+                        created_by = dataExist.created_by,
+                        created_on = dataExist.created_on,
+                        updated_by = "sys",
+                        updated_on = DateTime.Now.Date,
+                    };
+                    var update = _actDao.UpdateConfig(dataUpdate);
+                    result.is_ok = true;
+                    result.message = "Success";
+
+                }
+                else
+                {
+                    result.is_ok = false;
+                    result.message = "payload must be filled.";
+                    return Ok(result);
+                }
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to update, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        [HttpDelete]
+        [Route("Configuration/DeleteConfigById")]
+        public async Task<IActionResult> DeleteConfigById(long id)
+        {
+            var result = new APIResult<configurationModel>();
+            try
+            {
+                if (id == 0)
+                {
+                    result.is_ok = false;
+                    result.message = "id must be filled and greater than 0";
+                    result.data = null;
+                    return Ok(result);
+                }
+
+                await _actDao.DeleteConfigById(id);
+                result.is_ok = true;
+                result.message = "Success";
+            }
+            catch (Exception ex)
+            {
+                result.is_ok = false;
+                result.message = "Data failed to delete, please contact administrator";
+            }
+            return Ok(result);
+        }
+
+        #endregion
     }
 }

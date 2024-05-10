@@ -10,6 +10,7 @@ namespace WS_Appointment.EFCore
         public long id { get; set; }
         [Required]
         public string config_value { get; set; }
+        public string? description { get; set; }
         public DateTime? created_on { get; set; }
         public string? created_by { get; set; }
         public DateTime? updated_on { get; set; }
