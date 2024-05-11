@@ -34,5 +34,26 @@ namespace WS_AppointmentTest
             var res = (OkObjectResult)controller.GetAppointmentList().Result;
             Assert.Equal(expected, res.StatusCode);
         }
+
+        [Fact]
+        public async void GetHolidaysList()
+        {
+            var res = (OkObjectResult)controller.GetHolidaysList().Result;
+            Assert.Equal(expected, res.StatusCode);
+        }
+
+        [Fact]
+        public async void GetConfigList()
+        {
+            var res = (OkObjectResult)controller.GetConfigList().Result;
+            Assert.Equal(expected, res.StatusCode);
+        }
+
+        [Fact]
+        public async void GetCustomerList()
+        {
+            var res = (OkObjectResult)controller.GetCustomerList().Result;
+            Assert.Equal(expected, res.StatusCode);
+        }
     }
 }
