@@ -67,21 +67,29 @@ namespace WS_Appointment.Feature.dao
             customersModel result = new customersModel();
             try
             {
-                var data = await _context.Customers.AsNoTracking().FirstOrDefaultAsync();
-                result.id = data.id;
-                result.name = data.name;
-                result.email = data.email;
-                result.phone = data.phone;
-                result.address = data.address;
-                result.registration_date = data.registration_date;
-                result.created_by = data.created_by;
-                result.created_on = data.created_on;
-                result.updated_on = data.updated_on;
-                result.updated_by = data.updated_by;
+                var data = await _context.Customers.Where(x=>x.id == id).AsNoTracking().FirstOrDefaultAsync();
+                if(data != null)
+                {
+                    result.id = data.id;
+                    result.name = data.name;
+                    result.email = data.email;
+                    result.phone = data.phone;
+                    result.address = data.address;
+                    result.registration_date = data.registration_date;
+                    result.created_by = data.created_by;
+                    result.created_on = data.created_on;
+                    result.updated_on = data.updated_on;
+                    result.updated_by = data.updated_by;
+                }
+                else
+                {
+                    result = null;
+                }
             }
             catch (Exception ex)
             {
                 string message = ex.Message;
+                result = null;
             }
             return result;
         }
@@ -176,18 +184,26 @@ namespace WS_Appointment.Feature.dao
             publicHolidaysModel result = new publicHolidaysModel();
             try
             {
-                var data = await _context.Public_Holidays.AsNoTracking().FirstOrDefaultAsync();
-                result.id = data.id;
-                result.holiday_date = data.holiday_date;
-                result.description = data.description;
-                result.created_by = data.created_by;
-                result.created_on = data.created_on;
-                result.updated_on = data.updated_on;
-                result.updated_by = data.updated_by;
+                var data = await _context.Public_Holidays.Where(x=>x.id == id).AsNoTracking().FirstOrDefaultAsync();
+                if(data != null)
+                {
+                    result.id = data.id;
+                    result.holiday_date = data.holiday_date;
+                    result.description = data.description;
+                    result.created_by = data.created_by;
+                    result.created_on = data.created_on;
+                    result.updated_on = data.updated_on;
+                    result.updated_by = data.updated_by;
+                }
+                else
+                {
+                    result = null;
+                }
             }
             catch (Exception ex)
             {
                 string message = ex.Message;
+                result = null;
             }
             return result;
         }
@@ -278,18 +294,26 @@ namespace WS_Appointment.Feature.dao
             configurationModel result = new configurationModel();
             try
             {
-                var data = await _context.Configurations.AsNoTracking().FirstOrDefaultAsync();
-                result.id = data.id;
-                result.config_value = data.config_value;
-                result.description = data.description;
-                result.created_by = data.created_by;
-                result.created_on = data.created_on;
-                result.updated_on = data.updated_on;
-                result.updated_by = data.updated_by;
+                var data = await _context.Configurations.Where(x=>x.id == id).AsNoTracking().FirstOrDefaultAsync();
+                if(data != null)
+                {
+                    result.id = data.id;
+                    result.config_value = data.config_value;
+                    result.description = data.description;
+                    result.created_by = data.created_by;
+                    result.created_on = data.created_on;
+                    result.updated_on = data.updated_on;
+                    result.updated_by = data.updated_by;
+                }
+                else
+                {
+                    result = null;
+                }
             }
             catch (Exception ex)
             {
                 string message = ex.Message;
+                result = null;
             }
             return result;
         }
@@ -389,22 +413,30 @@ namespace WS_Appointment.Feature.dao
             appointmentsModel result = new appointmentsModel();
             try
             {
-                var data = await _context.Appointments.AsNoTracking().FirstOrDefaultAsync();
-                result.id = data.id;
-                result.customer_id = data.customer_id;
-                result.appointment_date = data.appointment_date;
-                result.status = data.status;
-                result.serviceType = data.serviceType;
-                result.token = data.token;
-                result.appointmentNo = data.appointmentNo;
-                result.created_by = data.created_by;
-                result.created_on = data.created_on;
-                result.updated_on = data.updated_on;
-                result.updated_by = data.updated_by;
+                var data = await _context.Appointments.Where(x=>x.id == id).AsNoTracking().FirstOrDefaultAsync();
+                if(data != null)
+                {
+                    result.id = data.id;
+                    result.customer_id = data.customer_id;
+                    result.appointment_date = data.appointment_date;
+                    result.status = data.status;
+                    result.serviceType = data.serviceType;
+                    result.token = data.token;
+                    result.appointmentNo = data.appointmentNo;
+                    result.created_by = data.created_by;
+                    result.created_on = data.created_on;
+                    result.updated_on = data.updated_on;
+                    result.updated_by = data.updated_by;
+                }
+                else
+                {
+                    result = null;
+                }
             }
             catch (Exception ex)
             {
                 string message = ex.Message;
+                result = null;
             }
             return result;
         }

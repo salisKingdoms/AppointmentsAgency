@@ -264,7 +264,15 @@ namespace WS_Appointment.Feature
                     result.data = null;
                     return Ok(result);
                 }
+
                 var data = await _actDao.GetAppointmentById(id);
+                if(data== null)
+                {
+                    result.data = null;
+                    result.is_ok = false;
+                    result.message = "Data not found, please contact administrator";
+                    return Ok(result);
+                }
                 result.data = data;
                 result.is_ok = true;
                 result.message = "Success";
@@ -408,6 +416,13 @@ namespace WS_Appointment.Feature
                     return Ok(result);
                 }
                 var data = await _actDao.GetCustomerById(id);
+                if(data == null)
+                {
+                    result.is_ok = false;
+                    result.message = "Data not found, please contact administrator";
+                    result.data = null;
+                    return Ok(result);
+                }
                 result.data = data;
                 result.is_ok = true;
                 result.message = "Success";
@@ -583,6 +598,13 @@ namespace WS_Appointment.Feature
                     return Ok(result);
                 }
                 var data = await _actDao.GetPubHolidayById(id);
+                if (data == null)
+                {
+                    result.is_ok = false;
+                    result.message = "Data not found, please contact administrator";
+                    result.data = null;
+                    return Ok(result);
+                }
                 result.data = data;
                 result.is_ok = true;
                 result.message = "Success";
@@ -753,6 +775,13 @@ namespace WS_Appointment.Feature
                     return Ok(result);
                 }
                 var data = await _actDao.GetConfigById(id);
+                if (data == null)
+                {
+                    result.is_ok = false;
+                    result.message = "Data not found, please contact administrator";
+                    result.data = null;
+                    return Ok(result);
+                }
                 result.data = data;
                 result.is_ok = true;
                 result.message = "Success";

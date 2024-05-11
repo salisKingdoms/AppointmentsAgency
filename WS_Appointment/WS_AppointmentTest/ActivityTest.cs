@@ -55,5 +55,17 @@ namespace WS_AppointmentTest
             var res = (OkObjectResult)controller.GetCustomerList().Result;
             Assert.Equal(expected, res.StatusCode);
         }
+
+        [Fact]
+        public async void GetDetailAppointmentById()
+        {
+            int validId = 7;
+            int invalidId = 1;
+
+            var res = (OkObjectResult)controller.GetDetailAppointmentById(validId).Result;
+            var res2 = (OkObjectResult)controller.GetDetailAppointmentById(invalidId).Result;
+            Assert.Equal(expected, res.StatusCode);
+            Assert.Equal(expected, res2.StatusCode);
+        }
     }
 }
