@@ -353,7 +353,7 @@ namespace WS_Appointment.Feature.dao
                 created_on = c.created_on != null ? c.created_on.Value : null,
                 updated_by = c.updated_by,
                 updated_on = c.updated_on != null ? c.updated_on.Value : null,
-            }).ToList();
+            }).OrderBy(c=>c.id).ToList();
             result = dataList;
 
             return result;

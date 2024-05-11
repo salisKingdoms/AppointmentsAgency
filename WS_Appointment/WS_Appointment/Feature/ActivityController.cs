@@ -87,15 +87,13 @@ namespace WS_Appointment.Feature
                 //to create new appointment no to other days if today maximal
                 int appno = 0;
                 DateTime appdate_fix = request.appointment_date;
-
+                rehit:
                 //get all holidays date next from appointment date
-                var nextHolidays = await _actDao.GetListHolidayForBook(request.appointment_date);
+                var nextHolidays = await _actDao.GetListHolidayForBook(appdate_fix);
                 foreach (var holiday in nextHolidays)
                 {
                     if (appdate_fix == holiday.holiday_date)
-                    {
-                        appdate_fix.AddDays(1);
-                    }
+                        appdate_fix = appdate_fix.AddDays(1);
                 }
 
                 //get max queue for datechoosen
@@ -107,7 +105,10 @@ namespace WS_Appointment.Feature
                 }
                 else
                 {
+                    //if queue reserve are maximal on choosen date, system will aoutomatically search next day , and then search the next day are holiday date or not again
                     appno += 1;
+                    appdate_fix = appdate_fix.AddDays(1);
+                    goto rehit;
                 }
 
                 appointmentsModel objApp = new appointmentsModel();
@@ -188,18 +189,17 @@ namespace WS_Appointment.Feature
                         return Ok(result);
                     }
                     //to create new appointment no to other days if today maximal
-                    int appno = (request.appointment_date != dataExist.appointment_date) ? 0: int.Parse(dataExist.appointmentNo);
-                    DateTime appdate_fix = (request.appointment_date!= dataExist.appointment_date) ?  request.appointment_date : dataExist.appointment_date;
+                    int appno = (request.appointment_date != dataExist.appointment_date) ? 0 : int.Parse(dataExist.appointmentNo);
+                    DateTime appdate_fix = (request.appointment_date != dataExist.appointment_date) ? request.appointment_date : dataExist.appointment_date;
                     if (request.appointment_date != dataExist.appointment_date)
                     {
                         //get all holidays date next from appointment date
-                        var nextHolidays = await _actDao.GetListHolidayForBook(request.appointment_date);
+                        rehit:
+                        var nextHolidays = await _actDao.GetListHolidayForBook(appdate_fix);
                         foreach (var holiday in nextHolidays)
                         {
                             if (appdate_fix == holiday.holiday_date)
-                            {
-                                appdate_fix.AddDays(1);
-                            }
+                                appdate_fix = appdate_fix.AddDays(1);
                         }
 
                         //get max queue for datechoosen
@@ -212,6 +212,8 @@ namespace WS_Appointment.Feature
                         else
                         {
                             appno += 1;
+                            appdate_fix = appdate_fix.AddDays(1);
+                            goto rehit;
                         }
                     }
 
